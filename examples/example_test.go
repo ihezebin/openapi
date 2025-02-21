@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ihezebin/openapi"
 	"github.com/ihezebin/openapi/examples/models"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateOpenAPISpec(t *testing.T) {
@@ -85,14 +86,19 @@ func NewTestAPI() *openapi.API {
 		HasTags([]string{"Topic"}).
 		HasDescription("Get one topic by id").
 		HasSummary("getOneTopic").
-		HasHeaderParameter("X-Request-Id", openapi.HeaderParam{
-			Description: "request id",
+		HasHeaderParameter("Authorization", openapi.HeaderParam{
+			Description: "Bearer token",
 			Required:    true,
 			Type:        openapi.PrimitiveTypeString,
 		}).
 		HasQueryParameter("limit", openapi.QueryParam{
 			Description: "limit",
 			Required:    true,
+		}).
+		HasResponseHeader(http.StatusOK, "Token", openapi.HeaderParam{
+			Description: "token",
+			Required:    true,
+			Type:        openapi.PrimitiveTypeString,
 		})
 
 	return api

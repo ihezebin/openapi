@@ -158,12 +158,14 @@ func (api *API) createOpenAPI() (spec *openapi3.T, err error) {
 					headerSchemas := make(map[string]*openapi3.HeaderRef)
 					for name, param := range headers {
 						schema := newPrimitiveSchema(param.Type)
-						header := openapi3.NewHeader().
-							WithDescription(param.Description).
-							WithSchema(schema)
-						header.Required = param.Required
 						headerSchemas[name] = &openapi3.HeaderRef{
-							Value: header,
+							Value: &openapi3.Header{
+								Parameter: openapi3.Parameter{
+									Schema:      schema.NewRef(),
+									Required:    param.Required,
+									Description: param.Description,
+								},
+							},
 						}
 					}
 					resp.Headers = headerSchemas
