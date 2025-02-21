@@ -107,6 +107,23 @@ func (api *API) createOpenAPI() (spec *openapi3.T, err error) {
 				op.AddParameter(pathParam)
 			}
 
+			// Add the header params.
+			for _, k := range getSortedKeys(route.Params.Header) {
+				v := route.Params.Header[k]
+
+				ps := newPrimitiveSchema(v.Type)
+				headerParam := openapi3.NewHeaderParameter(k).
+					WithDescription(v.Description).
+					WithSchema(ps)
+				headerParam.Required = v.Required
+
+				if v.ApplyCustomSchema != nil {
+					v.ApplyCustomSchema(headerParam)
+				}
+
+				op.AddParameter(headerParam)
+			}
+
 			// Handle request types.
 			if route.Models.Request.Type != nil {
 				name, schema, err := api.RegisterModel(route.Models.Request)
@@ -135,6 +152,23 @@ func (api *API) createOpenAPI() (spec *openapi3.T, err error) {
 							Schema: getSchemaReferenceOrValue(name, schema),
 						},
 					})
+
+				// 添加响应头处理
+				if headers, exists := route.Models.ResponseHeaders[status]; exists {
+					headerSchemas := make(map[string]*openapi3.HeaderRef)
+					for name, param := range headers {
+						schema := newPrimitiveSchema(param.Type)
+						header := openapi3.NewHeader().
+							WithDescription(param.Description).
+							WithSchema(schema)
+						header.Required = param.Required
+						headerSchemas[name] = &openapi3.HeaderRef{
+							Value: header,
+						}
+					}
+					resp.Headers = headerSchemas
+				}
+
 				op.AddResponse(status, resp)
 			}
 

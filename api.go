@@ -71,6 +71,8 @@ type Params struct {
 	// Query parameters are used in the querystring of the URL, e.g. /users/?sort={sortOrder} would
 	// have a name of "sort".
 	Query map[string]QueryParam
+	// Header parameters are used in HTTP headers
+	Header map[string]HeaderParam
 }
 
 // PathParam is a paramater that's used in the path of a URL.
@@ -100,6 +102,18 @@ type QueryParam struct {
 	// Type of the param (string, number, integer, boolean).
 	Type PrimitiveType
 	// ApplyCustomSchema customises the OpenAPI schema for the query parameter.
+	ApplyCustomSchema func(s *openapi3.Parameter)
+}
+
+// HeaderParam is a parameter that's used in HTTP headers
+type HeaderParam struct {
+	// Description of the param
+	Description string
+	// Required sets whether the header must be present
+	Required bool
+	// Type of the param (string, number, integer, boolean)
+	Type PrimitiveType
+	// ApplyCustomSchema customises the OpenAPI schema for the header parameter
 	ApplyCustomSchema func(s *openapi3.Parameter)
 }
 
@@ -166,6 +180,7 @@ func (api *API) Merge(r Route) {
 	toUpdate := api.Route(string(r.Method), string(r.Pattern))
 	mergeMap(toUpdate.Params.Path, r.Params.Path)
 	mergeMap(toUpdate.Params.Query, r.Params.Query)
+	mergeMap(toUpdate.Params.Header, r.Params.Header)
 	if toUpdate.Models.Request.Type == nil {
 		toUpdate.Models.Request = r.Models.Request
 	}
@@ -236,8 +251,9 @@ func (api *API) Route(method, pattern string) (r *Route) {
 				Responses: make(map[int]Model),
 			},
 			Params: Params{
-				Path:  make(map[string]PathParam),
-				Query: make(map[string]QueryParam),
+				Path:   make(map[string]PathParam),
+				Query:  make(map[string]QueryParam),
+				Header: make(map[string]HeaderParam),
 			},
 		}
 		methodToRoute[Method(method)] = route
@@ -320,6 +336,12 @@ func (rm *Route) HasQueryParameter(name string, q QueryParam) *Route {
 	return rm
 }
 
+// HasHeaderParameter configures a header parameter for the route
+func (rm *Route) HasHeaderParameter(name string, h HeaderParam) *Route {
+	rm.Params.Header[name] = h
+	return rm
+}
+
 // HasTags sets the tags for the route.
 func (rm *Route) HasTags(tags []string) *Route {
 	rm.Tags = append(rm.Tags, tags...)
@@ -344,10 +366,23 @@ func (rm *Route) HasSummary(summary string) *Route {
 	return rm
 }
 
+// HasResponseHeader 为指定状态码配置响应头
+func (rm *Route) HasResponseHeader(status int, name string, h HeaderParam) *Route {
+	if rm.Models.ResponseHeaders == nil {
+		rm.Models.ResponseHeaders = make(map[int]map[string]HeaderParam)
+	}
+	if rm.Models.ResponseHeaders[status] == nil {
+		rm.Models.ResponseHeaders[status] = make(map[string]HeaderParam)
+	}
+	rm.Models.ResponseHeaders[status][name] = h
+	return rm
+}
+
 // Models defines the models used by a route.
 type Models struct {
-	Request   Model
-	Responses map[int]Model
+	Request         Model
+	Responses       map[int]Model
+	ResponseHeaders map[int]map[string]HeaderParam
 }
 
 // ModelOf creates a model of type T.

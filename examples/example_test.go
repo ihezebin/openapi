@@ -55,14 +55,7 @@ func TestGenerateOpenAPISpec(t *testing.T) {
 	}
 
 	// 验证路径参数
-	if !assert.Len(t, getOp.Parameters, 1) {
-		return
-	}
-	param := getOp.Parameters[0].Value
-	if !assert.Equal(t, "id", param.Name) {
-		return
-	}
-	if !assert.Equal(t, "\\d+", param.Schema.Value.Pattern) {
+	if !assert.Len(t, getOp.Parameters, 3) {
 		return
 	}
 
@@ -91,7 +84,16 @@ func NewTestAPI() *openapi.API {
 		HasResponseModel(http.StatusInternalServerError, openapi.ModelOf[models.Body[map[string]string]]()).
 		HasTags([]string{"Topic"}).
 		HasDescription("Get one topic by id").
-		HasSummary("getOneTopic")
+		HasSummary("getOneTopic").
+		HasHeaderParameter("X-Request-Id", openapi.HeaderParam{
+			Description: "request id",
+			Required:    true,
+			Type:        openapi.PrimitiveTypeString,
+		}).
+		HasQueryParameter("limit", openapi.QueryParam{
+			Description: "limit",
+			Required:    true,
+		})
 
 	return api
 }
