@@ -57,7 +57,7 @@ api.Get("/topic/{id}").
    Type:        openapi.PrimitiveTypeString,
   }).HasDeprecated(true)
 
- api.Json()
+api.Json()
 ```
 
 ## Tasks
