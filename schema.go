@@ -188,6 +188,9 @@ func (api *API) createOpenAPI() (spec *openapi3.T, err error) {
 
 			// Register the method.
 			path.SetOperation(string(method), op)
+
+			// Handle deprecated.
+			op.Deprecated = route.Deprecated
 		}
 
 		// Populate the OpenAPI schemas from the models.

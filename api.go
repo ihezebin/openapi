@@ -61,6 +61,8 @@ type Route struct {
 	Description string
 	// Summary for the route.
 	Summary string
+	// Deprecated sets whether the route is deprecated.
+	Deprecated bool
 }
 
 // Params is a route parameter.
@@ -363,6 +365,12 @@ func (rm *Route) HasDescription(description string) *Route {
 // HasSummary sets the summary for the route.
 func (rm *Route) HasSummary(summary string) *Route {
 	rm.Summary = summary
+	return rm
+}
+
+// HasDeprecated sets the deprecated for the route.
+func (rm *Route) HasDeprecated(deprecated bool) *Route {
+	rm.Deprecated = deprecated
 	return rm
 }
 

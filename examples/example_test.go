@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/ihezebin/openapi"
 	"github.com/ihezebin/openapi/examples/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateOpenAPISpec(t *testing.T) {
@@ -99,7 +98,7 @@ func NewTestAPI() *openapi.API {
 			Description: "token",
 			Required:    true,
 			Type:        openapi.PrimitiveTypeString,
-		})
+		}).HasDeprecated(true)
 
 	return api
 }
