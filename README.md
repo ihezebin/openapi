@@ -30,9 +30,9 @@ See the [./examples](./examples) directory for complete examples.
 ```go
 // Configure the models.
 api := openapi.NewAPI("messages")
- api.StripPkgPaths = []string{"github.com/ihezebin/openapi/example", "github.com/a-h/respond"}
+api.StripPkgPaths = []string{"github.com/ihezebin/openapi/example", "github.com/a-h/respond"}
 
- api.Get("/topic/{id}").
+api.Get("/topic/{id}").
   HasPathParameter("id", openapi.PathParam{
    Description: "id of the topic",
    Regexp:      `\d+`,
