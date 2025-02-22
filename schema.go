@@ -6,13 +6,14 @@ import (
 	"regexp"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"golang.org/x/exp/constraints"
-
 	"github.com/ihezebin/openapi/enums"
 	"github.com/ihezebin/openapi/getcomments/parser"
+	"golang.org/x/exp/constraints"
 )
 
 func newSpec(name string) *openapi3.T {
@@ -221,6 +222,12 @@ func (api *API) getModelName(t reflect.Type) string {
 	if t.Kind() == reflect.Map {
 		typeName = fmt.Sprintf("map[%s]%s", t.Key().Name(), t.Elem().Name())
 	}
+
+	if t.Kind() == reflect.Struct && typeName == "" {
+		typeName = "Struct_" + strconv.FormatInt(time.Now().UnixMicro(), 10)
+
+	}
+
 	schemaName := api.normalizeTypeName(pkgPath, typeName)
 	if typeName == "" {
 		schemaName = fmt.Sprintf("AnonymousType")
@@ -507,6 +514,19 @@ func (api *API) normalizeTypeName(pkgPath, name string) string {
 			omitPackage = true
 			break
 		}
+	}
+
+	// Body[xx] remove suffix [xx]
+	re := regexp.MustCompile(`(\w+)\[struct\s*{.*}\]`)
+
+	// 使用分组替换语法 $1 引用第一个捕获组
+	//name = re.ReplaceAllString(name, "${1}[struct]")
+
+	//先判断是否匹配，再替换
+	if re.MatchString(name) {
+		name = re.ReplaceAllString(name, "${1}[struct]")
+		// 加随机值
+		name = strings.ReplaceAll(name, "[struct]", "[struct_"+strconv.FormatInt(time.Now().UnixMicro(), 10)+"]")
 	}
 
 	typeName := normalizer.Replace(pkgPath + "/" + name)

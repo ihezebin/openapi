@@ -397,12 +397,17 @@ type Models struct {
 func ModelOf[T any]() Model {
 	var t T
 	m := Model{
-		Type: reflect.TypeOf(t),
+		Type: reflect.TypeFor[T](),
 	}
 	if sm, ok := any(t).(CustomSchemaApplier); ok {
 		m.s = sm.ApplyCustomSchema
 	}
 	return m
+}
+
+// ModelFromType creates a model of type t.
+func ModelFromType(t reflect.Type) Model {
+	return modelFromType(t)
 }
 
 func modelFromType(t reflect.Type) Model {

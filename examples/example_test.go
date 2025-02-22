@@ -2,12 +2,12 @@ package examples
 
 import (
 	"net/http"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/ihezebin/openapi"
 	"github.com/ihezebin/openapi/examples/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateOpenAPISpec(t *testing.T) {
@@ -81,8 +81,19 @@ func NewTestAPI() *openapi.API {
 			Description: "id of the topic",
 			Regexp:      `\d+`,
 		}).
+		HasRequestModel(openapi.Model{
+			Type: reflect.TypeOf(struct {
+				Message string `json:"message"`
+			}{}),
+		}).
 		HasResponseModel(http.StatusOK, openapi.ModelOf[models.Body[models.Topic]]()).
+		HasResponseModel(http.StatusBadRequest, openapi.ModelOf[models.Body[struct {
+			Name string `json:"name"`
+			Age  int    `json:"age"`
+		}]]()).
 		HasResponseModel(http.StatusInternalServerError, openapi.ModelOf[models.Body[map[string]string]]()).
+		HasResponseModel(http.StatusAccepted, openapi.ModelOf[models.Body[any]]()).
+		HasResponseModel(http.StatusMovedPermanently, openapi.ModelOf[any]()).
 		HasTags([]string{"Topic"}).
 		HasDescription("Get one topic by id").
 		HasSummary("getOneTopic").
