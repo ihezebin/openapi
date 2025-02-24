@@ -22,6 +22,21 @@ func WithApplyCustomSchemaToType(f func(t reflect.Type, s *openapi3.Schema)) API
 	}
 }
 
+func WithInfo(info openapi3.Info) APIOpts {
+	return func(api *API) {
+		api.Info = info
+		if info.Title != "" {
+			api.Name = info.Title
+		}
+	}
+}
+
+func WithServer(servers ...openapi3.Server) APIOpts {
+	return func(api *API) {
+		api.Servers = servers
+	}
+}
+
 // NewAPI creates a new API from the router.
 func NewAPI(name string, opts ...APIOpts) *API {
 	api := &API{
@@ -142,6 +157,10 @@ type Pattern string
 type API struct {
 	// Name of the API.
 	Name string
+	// Info of the API.
+	Info openapi3.Info
+	// Servers of the API.
+	Servers []openapi3.Server
 	// Routes of the API.
 	// From patterns, to methods, to route.
 	Routes map[Pattern]MethodToRoute

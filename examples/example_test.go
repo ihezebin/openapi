@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/ihezebin/openapi"
 	"github.com/ihezebin/openapi/examples/models"
 	"github.com/stretchr/testify/assert"
@@ -73,7 +74,17 @@ func TestGenerateOpenAPISpec(t *testing.T) {
 }
 
 func NewTestAPI() *openapi.API {
-	api := openapi.NewAPI("messages")
+	api := openapi.NewAPI("messages", openapi.WithInfo(openapi3.Info{
+		Version:     "1.0.0",
+		Description: "A simple messages API",
+		Contact: &openapi3.Contact{
+			Name:  "Korbin",
+			Email: "ihezebin@qq.com",
+		},
+	}), openapi.WithServer(openapi3.Server{
+		URL:         "http://localhost:8080",
+		Description: "Local server",
+	}))
 	api.StripPkgPaths = []string{"github.com/ihezebin/openapi/example", "github.com/a-h/respond"}
 
 	api.Get("/topic/{id}").
@@ -86,7 +97,7 @@ func NewTestAPI() *openapi.API {
 				Message string `json:"message"`
 			}{}),
 		}).
-		HasResponseModel(http.StatusOK, openapi.ModelOf[models.Body[models.Topic]]()).
+		HasResponseModel(http.StatusOK, openapi.ModelOf[models.Body[**models.Topic]]()).
 		HasResponseModel(http.StatusBadRequest, openapi.ModelOf[models.Body[struct {
 			Name string `json:"name"`
 			Age  int    `json:"age"`

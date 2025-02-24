@@ -11,20 +11,28 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"golang.org/x/exp/constraints"
-
 	"github.com/ihezebin/openapi/enums"
 	"github.com/ihezebin/openapi/getcomments/parser"
+	"golang.org/x/exp/constraints"
 )
 
-func newSpec(name string) *openapi3.T {
+func newSpec(name string, info openapi3.Info, servers []openapi3.Server) *openapi3.T {
+	if info.Title == "" {
+		info.Title = name
+	}
+	if info.Version == "" {
+		info.Version = "0.0.0"
+	}
+
+	servers3 := make(openapi3.Servers, len(servers))
+	for i, s := range servers {
+		servers3[i] = &s
+	}
+
 	return &openapi3.T{
 		OpenAPI: "3.0.0",
-		Info: &openapi3.Info{
-			Title:      name,
-			Version:    "0.0.0",
-			Extensions: map[string]interface{}{},
-		},
+		Info:    &info,
+		Servers: servers3,
 		Components: &openapi3.Components{
 			Schemas:    make(openapi3.Schemas),
 			Extensions: map[string]interface{}{},
@@ -64,7 +72,7 @@ func newPrimitiveSchema(paramType PrimitiveType) *openapi3.Schema {
 }
 
 func (api *API) createOpenAPI() (spec *openapi3.T, err error) {
-	spec = newSpec(api.Name)
+	spec = newSpec(api.Name, api.Info, api.Servers)
 	// Add all the routes.
 	for pattern, methodToRoute := range api.Routes {
 		path := &openapi3.PathItem{}
