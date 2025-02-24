@@ -11,9 +11,10 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"golang.org/x/exp/constraints"
+
 	"github.com/ihezebin/openapi/enums"
 	"github.com/ihezebin/openapi/getcomments/parser"
-	"golang.org/x/exp/constraints"
 )
 
 func newSpec(name string) *openapi3.T {
@@ -505,6 +506,7 @@ var normalizer = strings.NewReplacer(
 	"(", "",
 	")", "",
 	"-", "_",
+	"*", "",
 )
 
 func (api *API) normalizeTypeName(pkgPath, name string) string {
