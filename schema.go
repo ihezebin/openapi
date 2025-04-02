@@ -11,9 +11,10 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"golang.org/x/exp/constraints"
+
 	"github.com/ihezebin/openapi/enums"
 	"github.com/ihezebin/openapi/getcomments/parser"
-	"golang.org/x/exp/constraints"
 )
 
 func newSpec(name string, info openapi3.Info, servers []openapi3.Server) *openapi3.T {
@@ -380,9 +381,9 @@ func (api *API) RegisterModel(model Model, opts ...ModelOpts) (name string, sche
 		schema.AdditionalProperties.Schema = getSchemaReferenceOrValue(elementName, elementSchema)
 	case reflect.Struct:
 		schema = openapi3.NewObjectSchema()
-		if schema.Description, schema.Deprecated, err = api.getTypeComment(t.PkgPath(), t.Name()); err != nil {
-			return name, schema, fmt.Errorf("failed to get comments for type %q: %w", name, err)
-		}
+		// if schema.Description, schema.Deprecated, err = api.getTypeComment(t.PkgPath(), t.Name()); err != nil {
+		// 	return name, schema, fmt.Errorf("failed to get comments for type %q: %w", name, err)
+		// }
 		schema.Properties = make(openapi3.Schemas)
 		for i := 0; i < t.NumField(); i++ {
 			f := t.Field(i)
